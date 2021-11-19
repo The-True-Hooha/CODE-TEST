@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>code test </title>
+</head>
+<body>
+<script>
+
+//the url from where the data is gotten from
+    let url = "https://api.apify.com/v2/datasets/VuFwckCdhVhoLJJ08/items?clean=true&format=json";
+
+//gets the data from the url
+const getData = async () => {
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+    // mapData produces the new array with the cheapest price and their calculative price,
+    // but without the dollar sign for easy calculation of the prices incase needed
+      const mapData = data.map((v) => ({ ...v,
+          calculativePrice: Number(v?.price.replaceAll("$", "")),
+        })).sort(
+            (a, b) => a.calculativePrice - b.calculativePrice
+        );
+        const cheapData = mapData[ 0 ];
+      
+    //returns the cheapest data from the array
+        console.log( cheapData );
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+//posts the cheapest data back to the url
+const postData = async (cheapData) => {
+    try {
+        const rawResponse = await fetch (url, {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(cheapData),
+        });
+
+        const cheapDataContent = await rawResponse.json();
+
+        console.log(cheapDataContent);
+    }   catch   (error) {
+        console.log(error);
+    }
+}
+  getData()
+</script>
+</body>
+</html>
